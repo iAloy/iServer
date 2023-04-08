@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Directory index of {{ .Dir.Path }}</title>
+		<style>
+			:root {
+				--background-color: #fafafa;
+				--color: rgba(0, 0, 0, 0.87);
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--background-color: #292929;
+					--color: #fff;
+				}
+				thead {
+					color: #7f7f7f;
+				}
+			}
+			@media (min-width: 960px) {
+				body {
+					padding-left: 32px;
+					padding-right: 32px;
+				}
+			}
+			@media (min-width: 600px) {
+				main {
+					padding-left: 24px;
+					padding-right: 24px;
+				}
+			}
+			body {
+				background: var(--background-color);
+				color: var(--color);
+				font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+				font-weight: 400;
+				line-height: 1.43;
+				font-size: 0.875rem;
+			}
+			a {
+				color: #2196f3;
+				text-decoration: none;
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+			thead {
+				text-align: left;
+			}
+			thead th {
+				padding-bottom: 12px;
+			}
+			table td {
+				padding: 6px 36px 6px 0px;
+			}
+			.size {
+				min-width: max-content;
+				white-space: nowrap;
+				text-align: right;
+				padding-right: 24px;
+			}
+			.mode {
+				font-family: monospace, monospace;
+			}
+		</style>
+	</head>
+	<body>
+		<h3 style="text-align: center;">iServer v{{.Version}}</h3>
+		<main>
+			<h2>Directory index of /<a href="/">home</a>{{range .Dir.BreadCrumbLinks}}/<a href="{{.Link}}">{{.Name}}</a>{{end}}</h2>
+			<hr />
+			<table>
+				<thead>
+					<tr>
+						<th>Mode</th>
+						<th>Size</th>
+						<th>Name</th>
+					</tr>
+				</thead>
+				{{range .Dir.Files}}
+				<tr>
+					<td class="mode">{{.Mode}}</td>
+					<td class="size">{{.Size}}</td>
+					<td>
+						<a {{if not .IsDir}} style="color: var(--color)" {{end}} href="{{.Link}}">{{.Name}}</a>
+					</td>
+				</tr>
+				{{end}}
+			</table>
+		</main>
+	</body>
+</html>
