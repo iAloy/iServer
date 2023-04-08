@@ -1,9 +1,9 @@
 package main
 
 /**
- *	iServer - Basic file server written in Go Lang
+ *  iServer - Basic file server written in Go Lang
  *
- *	@author: Monimoy Saha
+ *  @author: Monimoy Saha
  *  @created 08 Apr, 2023
  */
 
