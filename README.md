@@ -39,6 +39,8 @@ However for optimized binary size and cross compiling for amd64 and arm64 archit
 - [ ] add column for file modification date
 - [ ] add download button for each file
 - [ ] add support for sorting files and directories
+- [ ] add service file for linux
+- [ ] make deb package
 
 
 
