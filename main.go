@@ -29,16 +29,19 @@ var indexHTML string
 
 // defined flags
 var (
-	directory string
-	port      string
-	version   bool
-	verbose   bool
-	help      bool
+	directory  string
+	port       string
+	ignoreFile string
+	version    bool
+	verbose    bool
+	help       bool
+	pattern    *Pattern
 )
 
 func main() {
 	flag.StringVar(&directory, "d", ".", "the directory to serve")
 	flag.StringVar(&port, "p", "8080", "the port to listen on")
+	flag.StringVar(&ignoreFile, "i", ".ignore", "file ignore file name")
 	flag.BoolVar(&verbose, "v", false, "verbose output")
 	flag.BoolVar(&version, "V", false, "show version")
 	flag.BoolVar(&help, "h", false, "show help message")
@@ -59,6 +62,8 @@ func main() {
 		fmt.Printf("iServer v%s\n", versionStr)
 		return
 	}
+
+	pattern = ReadIgnoreFile(path.Join(directory, ignoreFile))
 
 	// start the server
 	http.HandleFunc("/", fileServer)
@@ -81,11 +86,12 @@ type Dir struct {
 }
 
 type File struct {
-	Name  string
-	Mode  string
-	Size  string
-	Link  string
-	IsDir bool
+	Name    string
+	Mode    string
+	Size    string
+	ModTime string
+	Link    string
+	IsDir   bool
 }
 
 type BreadCrumbLink struct {
@@ -97,6 +103,14 @@ func fileServer(w http.ResponseWriter, r *http.Request) {
 
 	urlPath := r.URL.Path
 	filePath := path.Join(directory, urlPath)
+
+	// match file/folder against ignore patterns
+	if pattern.Match(filePath) {
+		// http.Redirect(w, r, "/", http.StatusMovedPermanently)
+		http.NotFound(w, r)
+		log(r, http.StatusForbidden)
+		return
+	}
 
 	// check if the file exists
 	fileInfo, err := os.Stat(filePath)
@@ -130,7 +144,6 @@ func fileServer(w http.ResponseWriter, r *http.Request) {
 			{
 				Name:  "..",
 				Mode:  "drwxr-xr-x",
-				Size:  "0 B",
 				Link:  path.Join(urlPath, ".."),
 				IsDir: true,
 			},
@@ -152,13 +165,19 @@ func fileServer(w http.ResponseWriter, r *http.Request) {
 
 		// build file array
 		for _, i := range files {
+			// ignore if file pattern exists in ignore file
+			if i.Name() == ignoreFile || pattern.Match(path.Join(filePath, i.Name())) {
+				continue
+			}
+
 			fileInfo, _ := os.Stat(filePath + "/" + i.Name())
 			file := File{
-				Name:  fileInfo.Name(),
-				Mode:  fileInfo.Mode().String(),
-				Size:  ByteCountIEC(fileInfo.Size()),
-				Link:  path.Join(urlPath, fileInfo.Name()),
-				IsDir: fileInfo.IsDir(),
+				Name:    fileInfo.Name(),
+				Mode:    fileInfo.Mode().String(),
+				Size:    ByteCountIEC(fileInfo.Size()),
+				ModTime: fileInfo.ModTime().Format("02/01/06 15:04"),
+				Link:    path.Join(urlPath, fileInfo.Name()),
+				IsDir:   fileInfo.IsDir(),
 			}
 			if fileInfo.IsDir() {
 				directories = append(directories, file)

@@ -76,6 +76,7 @@
 					<tr>
 						<th>Mode</th>
 						<th>Size</th>
+						<th>Modified</th>
 						<th>Name</th>
 					</tr>
 				</thead>
@@ -83,6 +84,7 @@
 				<tr>
 					<td class="mode">{{.Mode}}</td>
 					<td class="size">{{.Size}}</td>
+					<td class="size">{{.ModTime}}</td>
 					<td>
 						<a {{if not .IsDir}} style="color: var(--color)" {{end}} href="{{.Link}}">{{.Name}}</a>
 					</td>
